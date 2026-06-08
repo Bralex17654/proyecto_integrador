@@ -17,7 +17,7 @@ const Productos = () => {
     precio: "",
     categoria: "",
     stock: "",
-    imagen: null,
+    imagen: "",
   });
 
   const [editando, setEditando] = useState(false);
@@ -58,7 +58,7 @@ const Productos = () => {
   const handleImagen = (e) => {
     setFormulario({
       ...formulario,
-      imagen: e.target.files[0],
+      imagen: e.target.value,
     });
   };
 
@@ -70,25 +70,22 @@ const Productos = () => {
     e.preventDefault();
 
     try {
-      const formData = new FormData();
-
-      formData.append("nombre", formulario.nombre);
-      formData.append("descripcion", formulario.descripcion);
-      formData.append("precio", formulario.precio);
-      formData.append("categoria", formulario.categoria);
-      formData.append("stock", formulario.stock);
-
-      if (formulario.imagen) {
-        formData.append("imagen", formulario.imagen);
-      }
+      const datos = {
+        nombre: formulario.nombre,
+        descripcion: formulario.descripcion,
+        precio: formulario.precio,
+        categoria: formulario.categoria,
+        stock: formulario.stock,
+        imagen: formulario.imagen,
+      };
 
       if (editando) {
-        await updateProducto(idProducto, formData);
+        await updateProducto(idProducto, datos);
 
         alert("Producto actualizado ✅");
         setEditando(false);
       } else {
-        await createProducto(formData);
+        await createProducto(datos);
 
         alert("Producto creado ✅");
       }
@@ -112,7 +109,7 @@ const Productos = () => {
       precio: producto.Precio,
       categoria: producto.Categoria,
       stock: producto.Stock,
-      imagen: null,
+      imagen: producto.Imagen || "",
     });
 
     setIdProducto(producto.Id);
@@ -150,7 +147,7 @@ const Productos = () => {
       precio: "",
       categoria: "",
       stock: "",
-      imagen: null,
+      imagen: producto.Imagen || "",
     });
 
     setIdProducto(null);
@@ -267,14 +264,16 @@ const Productos = () => {
 
                   <div className="mb-3">
                     <label className="form-label text-dark">
-                      Imagen del producto
+                      URL de imagen
                     </label>
 
                     <input
-                      className="form-control"
-                      type="file"
-                      accept="image/*"
-                      onChange={handleImagen}
+                      type="text"
+                      className="form-control mb-2"
+                      placeholder="https://ejemplo.com/imagen.jpg"
+                      name="imagen"
+                      value={formulario.imagen}
+                      onChange={handleChange}
                     />
                   </div>
 
@@ -283,13 +282,14 @@ const Productos = () => {
                   {formulario.imagen && (
                     <div className="text-center mb-3">
                       <img
-                        src={URL.createObjectURL(formulario.imagen)}
+                        src={formulario.imagen}
                         alt="Preview"
                         className="img-fluid rounded shadow"
                         style={{
                           height: "150px",
                           objectFit: "cover",
                         }}
+                        onError={(e) => { e.target.style.display = "none"; }}
                       />
                     </div>
                   )}

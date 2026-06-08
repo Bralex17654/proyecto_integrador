@@ -1,8 +1,13 @@
 import { pool } from "../config/db.js";
 
+const SELECT_PROVEEDORES = `
+  SELECT id AS "Id", nombre AS "Nombre", telefono AS "Telefono",
+         correo AS "Correo", empresa AS "Empresa"
+  FROM proveedores`;
+
 export const getProveedores = async (req, res) => {
   try {
-    const { rows } = await pool.query("SELECT * FROM proveedores ORDER BY id DESC");
+    const { rows } = await pool.query(SELECT_PROVEEDORES + " ORDER BY id DESC");
     res.json(rows);
   } catch (error) {
     res.status(500).json({ mensaje: "Error al obtener proveedores", error: error.message });
@@ -14,10 +19,10 @@ export const createProveedor = async (req, res) => {
     const { nombre, telefono, correo, empresa } = req.body;
     const result = await pool.query(
       `INSERT INTO proveedores (nombre, telefono, correo, empresa)
-       VALUES ($1, $2, $3, $4) RETURNING id`,
+       VALUES ($1, $2, $3, $4) RETURNING id AS "Id"`,
       [nombre, telefono, correo, empresa],
     );
-    res.status(201).json({ mensaje: "Proveedor creado", id: result.rows[0].id });
+    res.status(201).json({ mensaje: "Proveedor creado", id: result.rows[0].Id });
   } catch (error) {
     res.status(500).json({ mensaje: "Error al crear proveedor", error: error.message });
   }
@@ -28,9 +33,7 @@ export const updateProveedor = async (req, res) => {
     const { id } = req.params;
     const { nombre, telefono, correo, empresa } = req.body;
     await pool.query(
-      `UPDATE proveedores
-       SET nombre = $1, telefono = $2, correo = $3, empresa = $4
-       WHERE id = $5`,
+      `UPDATE proveedores SET nombre=$1, telefono=$2, correo=$3, empresa=$4 WHERE id=$5`,
       [nombre, telefono, correo, empresa, id],
     );
     res.json({ mensaje: "Proveedor actualizado" });

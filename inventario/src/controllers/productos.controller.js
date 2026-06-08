@@ -1,8 +1,13 @@
 import { pool } from "../config/db.js";
 
+const SELECT_PRODUCTOS = `
+  SELECT id AS "Id", nombre AS "Nombre", descripcion AS "Descripcion",
+         precio AS "Precio", categoria AS "Categoria", stock AS "Stock"
+  FROM productos`;
+
 export const getProductos = async (req, res) => {
   try {
-    const { rows } = await pool.query("SELECT * FROM productos");
+    const { rows } = await pool.query(SELECT_PRODUCTOS);
     res.json(rows);
   } catch (error) {
     res.status(500).json({ mensaje: "Error al obtener productos", error: error.message });
@@ -14,10 +19,10 @@ export const createProducto = async (req, res) => {
     const { nombre, descripcion, precio, categoria, stock } = req.body;
     const result = await pool.query(
       `INSERT INTO productos (nombre, descripcion, precio, categoria, stock)
-       VALUES ($1, $2, $3, $4, $5) RETURNING id`,
+       VALUES ($1, $2, $3, $4, $5) RETURNING id AS "Id"`,
       [nombre, descripcion, precio, categoria, stock],
     );
-    res.status(201).json({ mensaje: "Producto creado", id: result.rows[0].id });
+    res.status(201).json({ mensaje: "Producto creado", id: result.rows[0].Id });
   } catch (error) {
     res.status(500).json({ mensaje: "Error al crear producto", error: error.message });
   }
@@ -46,7 +51,6 @@ export const deleteProducto = async (req, res) => {
     await pool.query("DELETE FROM productos WHERE id = $1", [id]);
     res.json({ mensaje: "Producto eliminado" });
   } catch (error) {
-    console.error(error);
     res.status(500).json({ mensaje: "Error al eliminar", error: error.message });
   }
 };

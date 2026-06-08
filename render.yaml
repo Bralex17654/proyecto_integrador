@@ -1,5 +1,4 @@
 services:
-  # ── BACKEND ──────────────────────────────────────────────────────────────
   - type: web
     name: inventario-backend
     env: node
@@ -14,17 +13,16 @@ services:
       - key: DB_USER
         value: neondb_owner
       - key: DB_PASSWORD
-        sync: false        # ingresar manualmente en el dashboard de Render
+        sync: false
       - key: DB_NAME
         value: neondb
       - key: DB_PORT
         value: "5432"
       - key: JWT_SECRET
-        sync: false        # ingresar manualmente en el dashboard de Render
+        sync: false
       - key: FRONTEND_URL
-        sync: false        # ingresar la URL del frontend una vez deployado
+        sync: false
 
-  # ── FRONTEND ─────────────────────────────────────────────────────────────
   - type: web
     name: inventario-frontend
     env: static
@@ -37,4 +35,4 @@ services:
         destination: /index.html
     envVars:
       - key: VITE_API_URL
-        sync: false        # ingresar la URL del backend + /api (ej: https://inventario-backend.onrender.com/api)
+        sync: false

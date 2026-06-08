@@ -1,0 +1,40 @@
+services:
+  # ── BACKEND ──────────────────────────────────────────────────────────────
+  - type: web
+    name: inventario-backend
+    env: node
+    rootDir: inventario
+    buildCommand: npm install
+    startCommand: npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: DB_HOST
+        value: ep-floral-scene-apl9l0t0-pooler.c-7.us-east-1.aws.neon.tech
+      - key: DB_USER
+        value: neondb_owner
+      - key: DB_PASSWORD
+        sync: false        # ingresar manualmente en el dashboard de Render
+      - key: DB_NAME
+        value: neondb
+      - key: DB_PORT
+        value: "5432"
+      - key: JWT_SECRET
+        sync: false        # ingresar manualmente en el dashboard de Render
+      - key: FRONTEND_URL
+        sync: false        # ingresar la URL del frontend una vez deployado
+
+  # ── FRONTEND ─────────────────────────────────────────────────────────────
+  - type: web
+    name: inventario-frontend
+    env: static
+    rootDir: frontend-productos
+    buildCommand: npm install && npm run build
+    staticPublishPath: dist
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html
+    envVars:
+      - key: VITE_API_URL
+        sync: false        # ingresar la URL del backend + /api (ej: https://inventario-backend.onrender.com/api)

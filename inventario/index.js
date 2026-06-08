@@ -5,14 +5,12 @@ const PORT = process.env.PORT || 3000;
 
 /* TEST DB */
 pool
-  .getConnection()
-  .then((connection) => {
-    console.log("✅ MySQL conectado");
-
-    connection.release();
+  .query("SELECT 1")
+  .then(() => {
+    console.log("✅ PostgreSQL (Neon) conectado");
   })
   .catch((err) => {
-    console.error("❌ Error MySQL:", err);
+    console.error("❌ Error PostgreSQL:", err);
   });
 
 app.listen(PORT, () => {

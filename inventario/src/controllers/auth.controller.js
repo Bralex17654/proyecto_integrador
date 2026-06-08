@@ -10,58 +10,39 @@ export const login = async (req, res) => {
     const { correo, password } = req.body;
 
     if (!correo || !password) {
-      return res.status(400).json({
-        mensaje: "Todos los campos son obligatorios",
-      });
+      return res.status(400).json({ mensaje: "Todos los campos son obligatorios" });
     }
 
-    const [rows] = await pool.query("SELECT * FROM usuario WHERE correo = ?", [
-      correo,
-    ]);
+    const { rows } = await pool.query(
+      "SELECT * FROM usuario WHERE correo = $1",
+      [correo],
+    );
 
     if (rows.length === 0) {
-      return res.status(401).json({
-        mensaje: "Usuario no encontrado",
-      });
+      return res.status(401).json({ mensaje: "Usuario no encontrado" });
     }
 
     const usuario = rows[0];
-
-    const passwordValido = await bcrypt.compare(password, usuario.Password);
+    const passwordValido = await bcrypt.compare(password, usuario.password);
 
     if (!passwordValido) {
-      return res.status(401).json({
-        mensaje: "Contraseña incorrecta",
-      });
+      return res.status(401).json({ mensaje: "Contraseña incorrecta" });
     }
 
     const token = jwt.sign(
-      {
-        id: usuario.Id,
-        correo: usuario.Correo,
-      },
+      { id: usuario.id, correo: usuario.correo },
       process.env.JWT_SECRET,
-      {
-        expiresIn: "8h",
-      },
+      { expiresIn: "8h" },
     );
 
     res.json({
       mensaje: "Login exitoso",
       token,
-      usuario: {
-        id: usuario.Id,
-        nombre: usuario.Nombre,
-        correo: usuario.Correo,
-      },
+      usuario: { id: usuario.id, nombre: usuario.nombre, correo: usuario.correo },
     });
   } catch (error) {
     console.error(error);
-
-    res.status(500).json({
-      mensaje: "Error en login",
-      error: error.message,
-    });
+    res.status(500).json({ mensaje: "Error en login", error: error.message });
   }
 };
 
@@ -73,66 +54,41 @@ export const register = async (req, res) => {
     const { nombre, correo, password } = req.body;
 
     if (!nombre || !correo || !password) {
-      return res.status(400).json({
-        mensaje: "Todos los campos son obligatorios",
-      });
+      return res.status(400).json({ mensaje: "Todos los campos son obligatorios" });
     }
 
-    /* VERIFICAR USUARIO */
-
-    const [rows] = await pool.query("SELECT * FROM usuario WHERE correo = ?", [
-      correo,
-    ]);
+    const { rows } = await pool.query(
+      "SELECT * FROM usuario WHERE correo = $1",
+      [correo],
+    );
 
     if (rows.length > 0) {
-      return res.status(400).json({
-        mensaje: "El correo ya está registrado",
-      });
+      return res.status(400).json({ mensaje: "El correo ya está registrado" });
     }
-
-    /* HASH PASSWORD */
 
     const hash = await bcrypt.hash(password, 10);
 
-    /* INSERTAR */
-
-    const [result] = await pool.query(
-      `INSERT INTO usuario
-      (nombre, correo, password)
-      VALUES (?, ?, ?)`,
+    const result = await pool.query(
+      `INSERT INTO usuario (nombre, correo, password)
+       VALUES ($1, $2, $3) RETURNING id`,
       [nombre, correo, hash],
     );
 
-    /* TOKEN */
+    const newId = result.rows[0].id;
 
     const token = jwt.sign(
-      {
-        id: result.insertId,
-        correo,
-      },
+      { id: newId, correo },
       process.env.JWT_SECRET,
-      {
-        expiresIn: "8h",
-      },
+      { expiresIn: "8h" },
     );
 
     res.status(201).json({
       mensaje: "Usuario registrado correctamente",
-
       token,
-
-      usuario: {
-        id: result.insertId,
-        nombre,
-        correo,
-      },
+      usuario: { id: newId, nombre, correo },
     });
   } catch (error) {
     console.error(error);
-
-    res.status(500).json({
-      mensaje: "Error al registrar",
-      error: error.message,
-    });
+    res.status(500).json({ mensaje: "Error al registrar", error: error.message });
   }
 };

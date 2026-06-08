@@ -1,103 +1,52 @@
 import { pool } from "../config/db.js";
 
-/* =========================
-   OBTENER PRODUCTOS
-========================= */
 export const getProductos = async (req, res) => {
   try {
-    const [rows] = await pool.query("SELECT * FROM Productos");
-
+    const { rows } = await pool.query("SELECT * FROM productos");
     res.json(rows);
   } catch (error) {
-    res.status(500).json({
-      mensaje: "Error al obtener productos",
-      error: error.message,
-    });
+    res.status(500).json({ mensaje: "Error al obtener productos", error: error.message });
   }
 };
 
-/* =========================
-   CREAR PRODUCTO
-========================= */
 export const createProducto = async (req, res) => {
   try {
     const { nombre, descripcion, precio, categoria, stock } = req.body;
-
-    const [result] = await pool.query(
-      `INSERT INTO Productos
-      (Nombre, Descripcion, Precio, Categoria, Stock)
-      VALUES (?, ?, ?, ?, ?)`,
+    const result = await pool.query(
+      `INSERT INTO productos (nombre, descripcion, precio, categoria, stock)
+       VALUES ($1, $2, $3, $4, $5) RETURNING id`,
       [nombre, descripcion, precio, categoria, stock],
     );
-
-    res.status(201).json({
-      mensaje: "Producto creado",
-      id: result.insertId,
-    });
+    res.status(201).json({ mensaje: "Producto creado", id: result.rows[0].id });
   } catch (error) {
-    res.status(500).json({
-      mensaje: "Error al crear producto",
-      error: error.message,
-    });
+    res.status(500).json({ mensaje: "Error al crear producto", error: error.message });
   }
 };
 
-/* =========================
-   ACTUALIZAR PRODUCTO
-========================= */
 export const updateProducto = async (req, res) => {
   try {
     const { id } = req.params;
-
     const { nombre, descripcion, precio, categoria, stock } = req.body;
-
     await pool.query(
-      `UPDATE Productos
-      SET
-      Nombre = ?,
-      Descripcion = ?,
-      Precio = ?,
-      Categoria = ?,
-      Stock = ?
-      WHERE Id = ?`,
+      `UPDATE productos
+       SET nombre = $1, descripcion = $2, precio = $3, categoria = $4, stock = $5
+       WHERE id = $6`,
       [nombre, descripcion, precio, categoria, stock, id],
     );
-
-    res.json({
-      mensaje: "Producto actualizado",
-    });
+    res.json({ mensaje: "Producto actualizado" });
   } catch (error) {
-    res.status(500).json({
-      mensaje: "Error al actualizar",
-      error: error.message,
-    });
+    res.status(500).json({ mensaje: "Error al actualizar", error: error.message });
   }
 };
 
-/* =========================
-   ELIMINAR PRODUCTO
-========================= */
 export const deleteProducto = async (req, res) => {
   try {
     const { id } = req.params;
-
-    /* ELIMINAR DETALLES RELACIONADOS */
-
-    await pool.query("DELETE FROM detalle_venta WHERE producto_id = ?", [id]);
-
-    /* ELIMINAR PRODUCTO */
-
-    await pool.query("DELETE FROM productos WHERE Id = ?", [id]);
-
-    res.json({
-      mensaje: "Producto eliminado",
-    });
+    await pool.query("DELETE FROM detalle_venta WHERE producto_id = $1", [id]);
+    await pool.query("DELETE FROM productos WHERE id = $1", [id]);
+    res.json({ mensaje: "Producto eliminado" });
   } catch (error) {
     console.error(error);
-
-    res.status(500).json({
-      mensaje: "Error al eliminar",
-      error: error.message,
-    });
+    res.status(500).json({ mensaje: "Error al eliminar", error: error.message });
   }
 };

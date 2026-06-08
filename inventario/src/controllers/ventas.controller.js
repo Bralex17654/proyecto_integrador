@@ -4,71 +4,49 @@ import { pool } from "../config/db.js";
    CREAR VENTA
 ========================= */
 export const createVenta = async (req, res) => {
-  const connection = await pool.getConnection();
+  const client = await pool.connect();
 
   try {
-    await connection.beginTransaction();
+    await client.query("BEGIN");
 
     const { usuario_id, metodo_pago, productos } = req.body;
 
     let totalVenta = 0;
-
-    /* CALCULAR TOTAL */
     productos.forEach((item) => {
       totalVenta += item.precio * item.cantidad;
     });
 
     /* CREAR VENTA */
-    const [ventaResult] = await connection.query(
-      `INSERT INTO ventas
-      (Usuario_id, Total, Metodo_pago)
-      VALUES (?, ?, ?)`,
+    const ventaResult = await client.query(
+      `INSERT INTO ventas (usuario_id, total, metodo_pago)
+       VALUES ($1, $2, $3) RETURNING id`,
       [usuario_id, totalVenta, metodo_pago],
     );
-
-    const ventaId = ventaResult.insertId;
+    const ventaId = ventaResult.rows[0].id;
 
     /* DETALLE + STOCK */
     for (const item of productos) {
-      await connection.query(
-        `INSERT INTO detalle_venta
-        (Venta_id, Producto_id, Cantidad, Precio, Total)
-        VALUES (?, ?, ?, ?, ?)`,
-        [
-          ventaId,
-          item.producto_id,
-          item.cantidad,
-          item.precio,
-          item.precio * item.cantidad,
-        ],
+      await client.query(
+        `INSERT INTO detalle_venta (venta_id, producto_id, cantidad, precio, total)
+         VALUES ($1, $2, $3, $4, $5)`,
+        [ventaId, item.producto_id, item.cantidad, item.precio, item.precio * item.cantidad],
       );
 
-      /* ACTUALIZAR STOCK */
-      await connection.query(
-        `UPDATE Productos
-        SET Stock = Stock - ?
-        WHERE Id = ?`,
+      await client.query(
+        "UPDATE productos SET stock = stock - $1 WHERE id = $2",
         [item.cantidad, item.producto_id],
       );
     }
 
-    await connection.commit();
+    await client.query("COMMIT");
 
-    res.status(201).json({
-      mensaje: "Venta registrada",
-      ventaId,
-    });
+    res.status(201).json({ mensaje: "Venta registrada", ventaId });
   } catch (error) {
-    await connection.rollback();
-
+    await client.query("ROLLBACK");
     console.log(error);
-
-    res.status(500).json({
-      mensaje: "Error al registrar venta",
-      error: error.message,
-    });
+    res.status(500).json({ mensaje: "Error al registrar venta", error: error.message });
   } finally {
-    connection.release();
+    client.release();
   }
 };
 
@@ -77,30 +55,23 @@ export const createVenta = async (req, res) => {
 ========================= */
 export const getVentas = async (req, res) => {
   try {
-    const [rows] = await pool.query(
+    const { rows } = await pool.query(
       `SELECT
-        dv.Id,
-        v.Fecha,
-        p.Nombre AS Planta,
-        p.Categoria,
-        dv.Cantidad,
-        dv.Precio,
-        dv.Total
+        dv.id,
+        v.fecha,
+        p.nombre AS planta,
+        p.categoria,
+        dv.cantidad,
+        dv.precio,
+        dv.total
       FROM detalle_venta dv
-      INNER JOIN ventas v
-        ON dv.Venta_id = v.Id
-      INNER JOIN Productos p
-        ON dv.Producto_id = p.Id
-      ORDER BY v.Fecha DESC`,
+      INNER JOIN ventas v ON dv.venta_id = v.id
+      INNER JOIN productos p ON dv.producto_id = p.id
+      ORDER BY v.fecha DESC`,
     );
-
     res.json(rows);
   } catch (error) {
     console.log(error);
-
-    res.status(500).json({
-      mensaje: "Error al obtener ventas",
-      error: error.message,
-    });
+    res.status(500).json({ mensaje: "Error al obtener ventas", error: error.message });
   }
 };

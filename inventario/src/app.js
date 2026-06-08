@@ -11,7 +11,12 @@ import dashboardRoutes from "./routes/dashboard.routes.js";
 const app = express();
 
 /* MIDDLEWARES */
-app.use(cors());
+app.use(
+  cors({
+    origin: process.env.FRONTEND_URL || "*",
+    credentials: true,
+  }),
+);
 app.use(express.json());
 
 /* ROUTES */

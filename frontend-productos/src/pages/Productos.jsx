@@ -91,11 +91,11 @@ const Productos = () => {
       }
 
       limpiarFormulario();
-      obtenerProductos();
     } catch (error) {
       console.error(error);
       alert("Error al guardar producto");
     }
+    obtenerProductos();
   };
 
   /* =========================

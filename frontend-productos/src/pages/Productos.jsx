@@ -57,10 +57,20 @@ const Productos = () => {
   ========================= */
 
   const handleImagen = (e) => {
-    setFormulario({
-      ...formulario,
-      imagen: e.target.value,
-    });
+    const file = e.target.files[0];
+    if (!file) return;
+
+    if (file.size > 2 * 1024 * 1024) {
+      alert("La imagen no puede superar 2 MB");
+      e.target.value = "";
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setFormulario((prev) => ({ ...prev, imagen: reader.result }));
+    };
+    reader.readAsDataURL(file);
   };
 
   /* =========================
@@ -272,19 +282,16 @@ const Productos = () => {
 
                   <div className="mb-3">
                     <label className="form-label text-dark">
-                      URL de imagen
+                      Foto del producto
                     </label>
 
-                    <textarea
+                    <input
+                      type="file"
                       className="form-control mb-2"
-                      placeholder="https://ejemplo.com/imagen.jpg"
-                      name="imagen"
-                      value={formulario.imagen}
-                      onChange={handleChange}
-                      rows={3}
-                      maxLength={1000}
-                      style={{ resize: "vertical" }}
+                      accept="image/*"
+                      onChange={handleImagen}
                     />
+                    <small className="text-white">Máximo 2 MB</small>
                   </div>
 
                   {/* PREVIEW */}

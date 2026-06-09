@@ -275,13 +275,15 @@ const Productos = () => {
                       URL de imagen
                     </label>
 
-                    <input
-                      type="text"
+                    <textarea
                       className="form-control mb-2"
                       placeholder="https://ejemplo.com/imagen.jpg"
                       name="imagen"
                       value={formulario.imagen}
                       onChange={handleChange}
+                      rows={3}
+                      maxLength={1000}
+                      style={{ resize: "vertical" }}
                     />
                   </div>
 

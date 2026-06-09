@@ -69,7 +69,22 @@ const Productos = () => {
 
     const reader = new FileReader();
     reader.onloadend = () => {
-      setFormulario((prev) => ({ ...prev, imagen: reader.result }));
+      // Comprimir la imagen antes de guardar
+      const img = new Image();
+      img.src = reader.result;
+      img.onload = () => {
+        const canvas = document.createElement("canvas");
+        const MAX = 600;
+        let w = img.width;
+        let h = img.height;
+        if (w > h && w > MAX) { h = (h * MAX) / w; w = MAX; }
+        else if (h > MAX) { w = (w * MAX) / h; h = MAX; }
+        canvas.width = w;
+        canvas.height = h;
+        canvas.getContext("2d").drawImage(img, 0, 0, w, h);
+        const comprimida = canvas.toDataURL("image/jpeg", 0.75);
+        setFormulario((prev) => ({ ...prev, imagen: comprimida }));
+      };
     };
     reader.readAsDataURL(file);
   };

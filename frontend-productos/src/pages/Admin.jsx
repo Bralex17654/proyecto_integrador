@@ -7,6 +7,7 @@ import { createVenta } from "../services/ventas.service";
 
 const Admin = () => {
   const [productos, setProductos] = useState([]);
+  const [cargando, setCargando] = useState(true);
   const [busqueda, setBusqueda] = useState("");
   const [carrito, setCarrito] = useState([]);
   const [cantidades, setCantidades] = useState({});
@@ -18,6 +19,7 @@ const Admin = () => {
   }, []);
 
   const obtenerProductos = async () => {
+    setCargando(true);
     try {
       const data = await getProductos();
       setProductos(data);
@@ -26,6 +28,8 @@ const Admin = () => {
       setCantidades(init);
     } catch (error) {
       console.log(error);
+    } finally {
+      setCargando(false);
     }
   };
 
@@ -183,15 +187,34 @@ const Admin = () => {
 
             <h3 className="mb-4 fw-bold">
               Inventario Disponible
-              {busqueda && (
+              {busqueda && !cargando && (
                 <span className="fs-6 fw-normal ms-2 text-white-50">
                   — {productosFiltrados.length} resultado(s)
                 </span>
               )}
             </h3>
 
+            {/* ESQUELETOS DE CARGA */}
+            {cargando && (
+              <div className="row">
+                {[...Array(8)].map((_, i) => (
+                  <div key={i} className="col-md-4 mb-4">
+                    <div className="card border-0 shadow-lg" style={{ borderRadius: "20px", overflow: "hidden", background: "rgba(255,255,255,0.15)" }}>
+                      <div style={{ height: "180px", background: "rgba(255,255,255,0.1)", animation: "pulse 1.5s infinite" }} />
+                      <div className="card-body">
+                        <div style={{ height: "16px", borderRadius: "8px", background: "rgba(255,255,255,0.15)", marginBottom: "8px", animation: "pulse 1.5s infinite" }} />
+                        <div style={{ height: "12px", borderRadius: "8px", background: "rgba(255,255,255,0.1)", width: "60%", marginBottom: "12px", animation: "pulse 1.5s infinite" }} />
+                        <div style={{ height: "28px", borderRadius: "8px", background: "rgba(255,255,255,0.1)", animation: "pulse 1.5s infinite" }} />
+                      </div>
+                    </div>
+                  </div>
+                ))}
+                <style>{`@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.4} }`}</style>
+              </div>
+            )}
+
             {/* TARJETAS */}
-            <div className="row">
+            {!cargando && <div className="row">
               {productosFiltrados.map((producto) => (
                 <div key={producto.Id} className="col-md-4 mb-4">
                   <div
@@ -201,6 +224,7 @@ const Admin = () => {
                     <img
                       src={producto.Imagen}
                       alt={producto.Nombre}
+                      loading="lazy"
                       style={{ height: "180px", objectFit: "cover" }}
                       onError={(e) => { e.target.style.display = "none"; }}
                     />
@@ -240,11 +264,12 @@ const Admin = () => {
               ))}
             </div>
 
-            {productosFiltrados.length === 0 && (
+            {productosFiltrados.length === 0 && !cargando && (
               <div className="alert alert-light" style={{ background: "rgba(255,255,255,.75)" }}>
                 {busqueda ? `No se encontraron productos con "${busqueda}"` : "No hay productos registrados"}
               </div>
             )}
+            </div>}
           </div>
 
           {/* CARRITO DE VENTA */}

@@ -151,7 +151,7 @@ const Productos = () => {
       precio: "",
       categoria: "",
       stock: "",
-      imagen: producto.Imagen || "",
+      imagen: "",
     });
 
     setIdProducto(null);

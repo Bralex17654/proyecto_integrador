@@ -157,6 +157,8 @@ const Ventas = () => {
                     name="planta"
                     value={formulario.planta}
                     onChange={handleChange}
+                    min="1"
+                    step="1"
                     required
                   />
 
@@ -180,6 +182,8 @@ const Ventas = () => {
                     name="cantidad"
                     value={formulario.cantidad}
                     onChange={handleChange}
+                    min="1"
+                    step="1"
                     required
                   />
 
@@ -190,6 +194,8 @@ const Ventas = () => {
                     name="precio"
                     value={formulario.precio}
                     onChange={handleChange}
+                    min="0"
+                    step="0.01"
                     required
                   />
 

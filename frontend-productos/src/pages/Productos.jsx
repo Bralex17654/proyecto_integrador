@@ -60,8 +60,8 @@ const Productos = () => {
     const file = e.target.files[0];
     if (!file) return;
 
-    if (file.size > 2 * 1024 * 1024) {
-      alert("La imagen no puede superar 2 MB");
+    if (file.size > 10 * 1024 * 1024) {
+      alert("La imagen no puede superar 10 MB");
       e.target.value = "";
       return;
     }
@@ -308,7 +308,7 @@ const Productos = () => {
                       </label>
                     </div>
 
-                    <small className="text-white">Máximo 2 MB</small>
+                    <small className="text-white">Máximo 10 MB</small>
                   </div>
 
                   {/* PREVIEW */}

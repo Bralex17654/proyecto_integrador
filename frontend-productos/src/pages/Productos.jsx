@@ -285,12 +285,29 @@ const Productos = () => {
                       Foto del producto
                     </label>
 
-                    <input
-                      type="file"
-                      className="form-control mb-2"
-                      accept="image/*"
-                      onChange={handleImagen}
-                    />
+                    <div className="d-flex gap-2 mb-2">
+                      <label className="btn btn-outline-light w-50 mb-0" style={{ cursor: "pointer" }}>
+                        📁 Galería
+                        <input
+                          type="file"
+                          accept="image/*"
+                          onChange={handleImagen}
+                          style={{ display: "none" }}
+                        />
+                      </label>
+
+                      <label className="btn btn-outline-light w-50 mb-0" style={{ cursor: "pointer" }}>
+                        📷 Cámara
+                        <input
+                          type="file"
+                          accept="image/*"
+                          capture="environment"
+                          onChange={handleImagen}
+                          style={{ display: "none" }}
+                        />
+                      </label>
+                    </div>
+
                     <small className="text-white">Máximo 2 MB</small>
                   </div>
 

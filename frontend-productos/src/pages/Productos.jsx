@@ -23,6 +23,7 @@ const Productos = () => {
   const [editando, setEditando] = useState(false);
   const [cargando, setCargando] = useState(false);
   const [idProducto, setIdProducto] = useState(null);
+  const [busqueda, setBusqueda] = useState("");
 
   /* =========================
      OBTENER PRODUCTOS
@@ -347,7 +348,15 @@ const Productos = () => {
                   border: "1px solid rgba(255,255,255,.25)",
                 }}
               >
-                <h4 className="mb-4 text-dark">Lista de Productos</h4>
+                <h4 className="mb-3 text-dark">Lista de Productos</h4>
+
+                <input
+                  type="text"
+                  className="form-control mb-3"
+                  placeholder="🔍 Buscar producto..."
+                  value={busqueda}
+                  onChange={(e) => setBusqueda(e.target.value)}
+                />
 
                 <div className="table-responsive">
                   <table className="table table-hover align-middle">
@@ -368,7 +377,12 @@ const Productos = () => {
                     </thead>
 
                     <tbody>
-                      {productos.map((producto) => (
+                      {productos
+                        .filter((p) =>
+                          p.Nombre.toLowerCase().includes(busqueda.toLowerCase()) ||
+                          p.Categoria?.toLowerCase().includes(busqueda.toLowerCase())
+                        )
+                        .map((producto) => (
                         <tr key={producto.Id}>
                           <td>{producto.Id}</td>
 

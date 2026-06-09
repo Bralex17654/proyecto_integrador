@@ -5,6 +5,13 @@ export const createVenta = async (req, res) => {
   try {
     await client.query("BEGIN");
     const { usuario_id, metodo_pago, productos } = req.body;
+
+    for (const item of productos) {
+      if (parseFloat(item.precio) < 0 || parseInt(item.cantidad) < 0) {
+        return res.status(400).json({ mensaje: "Precio y cantidad no pueden ser negativos" });
+      }
+    }
+
     let totalVenta = 0;
     productos.forEach((item) => { totalVenta += item.precio * item.cantidad; });
 

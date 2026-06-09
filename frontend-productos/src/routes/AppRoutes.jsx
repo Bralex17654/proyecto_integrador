@@ -7,6 +7,14 @@ import Inventario from "../pages/Inventario";
 import Productos from "../pages/Productos";
 import Ventas from "../pages/Ventas";
 import Reportes from "../pages/Reportes";
+import Clientes from "../pages/Clientes";
+import Proveedores from "../pages/Proveedores";
+
+/* Protege rutas: si no hay token redirige al login */
+const PrivateRoute = ({ children }) => {
+  const token = localStorage.getItem("token");
+  return token ? children : <Navigate to="/" replace />;
+};
 
 const AppRoutes = () => {
   return (
@@ -14,19 +22,16 @@ const AppRoutes = () => {
       <Routes>
         <Route path="/" element={<Login />} />
 
-        <Route path="/dashboard" element={<Dashboard />} />
-    
-        <Route path="/admin" element={<Admin />} />
-
-        <Route path="/inventario" element={<Inventario />} />
-
-        <Route path="/productos" element={<Productos />} />
+        <Route path="/admin"        element={<PrivateRoute><Admin /></PrivateRoute>} />
+        <Route path="/dashboard"    element={<PrivateRoute><Dashboard /></PrivateRoute>} />
+        <Route path="/inventario"   element={<PrivateRoute><Inventario /></PrivateRoute>} />
+        <Route path="/productos"    element={<PrivateRoute><Productos /></PrivateRoute>} />
+        <Route path="/ventas"       element={<PrivateRoute><Ventas /></PrivateRoute>} />
+        <Route path="/reportes"     element={<PrivateRoute><Reportes /></PrivateRoute>} />
+        <Route path="/clientes"     element={<PrivateRoute><Clientes /></PrivateRoute>} />
+        <Route path="/proveedores"  element={<PrivateRoute><Proveedores /></PrivateRoute>} />
 
         <Route path="*" element={<Navigate to="/" />} />
-
-        <Route path="/ventas" element={<Ventas />} />
-
-        <Route path="/reportes" element={<Reportes />} />
       </Routes>
     </BrowserRouter>
   );

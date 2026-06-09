@@ -133,11 +133,35 @@ const Admin = () => {
               </Link>
 
               <Link
+                to="/clientes"
+                className="btn btn-light shadow-sm"
+                style={{ borderRadius: "12px" }}
+              >
+                👥 Clientes
+              </Link>
+
+              <Link
+                to="/proveedores"
+                className="btn btn-light shadow-sm"
+                style={{ borderRadius: "12px" }}
+              >
+                🏭 Proveedores
+              </Link>
+
+              <Link
                 to="/reportes"
                 className="btn btn-light shadow-sm"
                 style={{ borderRadius: "12px" }}
               >
                 📊 Reportes
+              </Link>
+
+              <Link
+                to="/dashboard"
+                className="btn btn-light shadow-sm"
+                style={{ borderRadius: "12px" }}
+              >
+                📈 Dashboard
               </Link>
             </div>
           </div>

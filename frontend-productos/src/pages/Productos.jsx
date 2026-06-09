@@ -21,6 +21,7 @@ const Productos = () => {
   });
 
   const [editando, setEditando] = useState(false);
+  const [cargando, setCargando] = useState(false);
   const [idProducto, setIdProducto] = useState(null);
 
   /* =========================
@@ -68,7 +69,8 @@ const Productos = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
+    if (cargando) return;
+    setCargando(true);
     try {
       const datos = {
         nombre: formulario.nombre,
@@ -94,6 +96,8 @@ const Productos = () => {
     } catch (error) {
       console.error(error);
       alert("Error al guardar producto");
+    } finally {
+      setCargando(false);
     }
     obtenerProductos();
   };

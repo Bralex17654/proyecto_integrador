@@ -12,11 +12,11 @@ const Admin = () => {
   const [carrito, setCarrito] = useState([]);
   const [cantidades, setCantidades] = useState({});
   const [procesando, setProcesando] = useState(false);
+  const [ticket, setTicket] = useState(null);
+  const [menuAbierto, setMenuAbierto] = useState(false);
   const navigate = useNavigate();
 
-  useEffect(() => {
-    obtenerProductos();
-  }, []);
+  useEffect(() => { obtenerProductos(); }, []);
 
   const obtenerProductos = async () => {
     setCargando(true);
@@ -39,52 +39,38 @@ const Admin = () => {
     navigate("/");
   };
 
-  /* =========================
-     CARRITO
-  ========================= */
-
+  /* CARRITO */
   const agregarAlCarrito = (producto) => {
     const cantidad = Number(cantidades[producto.Id]) || 1;
     if (cantidad <= 0) return;
     if (cantidad > producto.Stock) {
-      alert(`Solo hay ${producto.Stock} unidades disponibles de ${producto.Nombre}`);
+      alert(`Solo hay ${producto.Stock} unidades de ${producto.Nombre}`);
       return;
     }
     setCarrito((prev) => {
       const existe = prev.find((i) => i.Id === producto.Id);
       if (existe) {
-        const nuevaCantidad = existe.cantidad + cantidad;
-        if (nuevaCantidad > producto.Stock) {
-          alert(`Solo hay ${producto.Stock} unidades disponibles de ${producto.Nombre}`);
+        const nueva = existe.cantidad + cantidad;
+        if (nueva > producto.Stock) {
+          alert(`Solo hay ${producto.Stock} unidades de ${producto.Nombre}`);
           return prev;
         }
-        return prev.map((i) =>
-          i.Id === producto.Id ? { ...i, cantidad: nuevaCantidad } : i
-        );
+        return prev.map((i) => i.Id === producto.Id ? { ...i, cantidad: nueva } : i);
       }
       return [...prev, { ...producto, cantidad }];
     });
   };
 
-  const quitarDelCarrito = (id) => {
-    setCarrito((prev) => prev.filter((i) => i.Id !== id));
-  };
+  const quitarDelCarrito = (id) => setCarrito((prev) => prev.filter((i) => i.Id !== id));
 
   const cambiarCantidadCarrito = (id, valor) => {
-    const producto = productos.find((p) => p.Id === id);
+    const prod = productos.find((p) => p.Id === id);
     const nueva = Math.max(1, Number(valor));
-    if (producto && nueva > producto.Stock) {
-      alert(`Solo hay ${producto.Stock} unidades disponibles`);
-      return;
-    }
-    setCarrito((prev) =>
-      prev.map((i) => (i.Id === id ? { ...i, cantidad: nueva } : i))
-    );
+    if (prod && nueva > prod.Stock) { alert(`Solo hay ${prod.Stock} unidades`); return; }
+    setCarrito((prev) => prev.map((i) => i.Id === id ? { ...i, cantidad: nueva } : i));
   };
 
-  const totalCarrito = carrito.reduce(
-    (acc, i) => acc + Number(i.Precio) * i.cantidad, 0
-  );
+  const totalCarrito = carrito.reduce((acc, i) => acc + Number(i.Precio) * i.cantidad, 0);
 
   const registrarVenta = async () => {
     if (carrito.length === 0) return;
@@ -101,7 +87,14 @@ const Admin = () => {
         })),
       };
       await createVenta(venta);
-      alert(`Venta registrada ✅\nTotal: $${totalCarrito.toFixed(2)}`);
+
+      // Generar ticket
+      setTicket({
+        fecha: new Date().toLocaleString(),
+        items: [...carrito],
+        total: totalCarrito,
+      });
+
       setCarrito([]);
       obtenerProductos();
     } catch (error) {
@@ -117,48 +110,52 @@ const Admin = () => {
     p.Categoria?.toLowerCase().includes(busqueda.toLowerCase())
   );
 
+  const menuLinks = [
+    { to: "/productos",   label: "📦 Productos" },
+    { to: "/inventario",  label: "🌿 Inventario" },
+    { to: "/ventas",      label: "💰 Ventas" },
+    { to: "/clientes",    label: "👥 Clientes" },
+    { to: "/proveedores", label: "🏭 Proveedores" },
+    { to: "/reportes",    label: "📊 Reportes" },
+    { to: "/dashboard",   label: "📈 Dashboard" },
+  ];
+
   return (
-    <div
-      className="container-fluid p-0"
-      style={{
-        minHeight: "100vh",
-        backgroundImage: `url(${fondo})`,
-        backgroundSize: "cover",
-        backgroundPosition: "center",
-        backgroundAttachment: "fixed",
-      }}
-    >
+    <div className="container-fluid p-0" style={{ minHeight: "100vh", backgroundImage: `url(${fondo})`, backgroundSize: "cover", backgroundPosition: "center", backgroundAttachment: "fixed" }}>
       <div style={{ background: "rgba(0,0,0,0.45)", minHeight: "100vh" }}>
 
         {/* NAVBAR */}
-        <div
-          className="text-white p-3 d-flex justify-content-between align-items-center"
-          style={{ background: "rgba(20,20,20,0.75)", backdropFilter: "blur(10px)" }}
-        >
-          <div className="d-flex align-items-center">
-            <img src={logo} alt="Logo" style={{ width: "65px", height: "65px", objectFit: "cover", borderRadius: "50%", marginRight: "15px", boxShadow: "0 0 15px rgba(255,255,255,.3)" }} />
-            <h2 className="m-0 fw-bold">Panel de Control Administrativo 🌱</h2>
+        <div className="text-white p-2 p-md-3 d-flex justify-content-between align-items-center" style={{ background: "rgba(20,20,20,0.75)", backdropFilter: "blur(10px)" }}>
+          <div className="d-flex align-items-center gap-2">
+            {/* BOTÓN MENÚ MÓVIL */}
+            <button className="btn btn-outline-light btn-sm d-md-none" onClick={() => setMenuAbierto(!menuAbierto)}>☰</button>
+            <img src={logo} alt="Logo" style={{ width: "45px", height: "45px", objectFit: "cover", borderRadius: "50%" }} />
+            <h5 className="m-0 fw-bold d-none d-sm-block">Panel Administrativo 🌱</h5>
+            <h6 className="m-0 fw-bold d-sm-none">Vivero 🌱</h6>
           </div>
-          <button className="btn btn-danger" onClick={cerrarSesion} style={{ borderRadius: "12px", padding: "10px 20px" }}>
-            Cerrar sesión
-          </button>
+          <button className="btn btn-danger btn-sm" onClick={cerrarSesion} style={{ borderRadius: "10px" }}>Salir</button>
         </div>
 
+        {/* MENÚ MÓVIL DESPLEGABLE */}
+        {menuAbierto && (
+          <div className="d-md-none p-3" style={{ background: "rgba(25,135,84,0.95)", backdropFilter: "blur(8px)" }}>
+            <div className="d-grid gap-2">
+              {menuLinks.map((item) => (
+                <Link key={item.to} to={item.to} className="btn btn-light btn-sm" style={{ borderRadius: "10px" }} onClick={() => setMenuAbierto(false)}>
+                  {item.label}
+                </Link>
+              ))}
+            </div>
+          </div>
+        )}
+
         <div className="row g-0">
-          {/* SIDEBAR */}
-          <div className="col-md-2 text-white p-4" style={{ minHeight: "100vh", background: "rgba(25,135,84,0.88)", backdropFilter: "blur(8px)" }}>
-            <h4 className="mb-4 fw-bold">Menú</h4>
-            <div className="d-grid gap-3">
-              {[
-                { to: "/productos", label: "📦 Productos" },
-                { to: "/inventario", label: "🌿 Inventario" },
-                { to: "/ventas", label: "💰 Ventas" },
-                { to: "/clientes", label: "👥 Clientes" },
-                { to: "/proveedores", label: "🏭 Proveedores" },
-                { to: "/reportes", label: "📊 Reportes" },
-                { to: "/dashboard", label: "📈 Dashboard" },
-              ].map((item) => (
-                <Link key={item.to} to={item.to} className="btn btn-light shadow-sm" style={{ borderRadius: "12px" }}>
+          {/* SIDEBAR ESCRITORIO */}
+          <div className="col-md-2 text-white p-3 d-none d-md-block" style={{ minHeight: "100vh", background: "rgba(25,135,84,0.88)", backdropFilter: "blur(8px)" }}>
+            <h5 className="mb-3 fw-bold">Menú</h5>
+            <div className="d-grid gap-2">
+              {menuLinks.map((item) => (
+                <Link key={item.to} to={item.to} className="btn btn-light btn-sm shadow-sm" style={{ borderRadius: "10px" }}>
                   {item.label}
                 </Link>
               ))}
@@ -166,191 +163,201 @@ const Admin = () => {
           </div>
 
           {/* CONTENIDO PRINCIPAL */}
-          <div className="col-md-7 p-4 text-white">
-            {/* BIENVENIDA */}
-            <div className="p-4 rounded shadow mb-4" style={{ background: "rgba(255,255,255,0.12)", backdropFilter: "blur(10px)" }}>
-              <h1 className="fw-bold mb-2">Bienvenido a tu inventario 🌿</h1>
-              <p className="mb-0">Desde aquí podrás administrar todo el sistema del vivero.</p>
+          <div className="col-12 col-md-7 p-3 p-md-4 text-white">
+            <div className="p-3 rounded shadow mb-3" style={{ background: "rgba(255,255,255,0.12)", backdropFilter: "blur(10px)" }}>
+              <h4 className="fw-bold mb-1">Bienvenido a tu inventario 🌿</h4>
+              <p className="mb-0 small">Administra el sistema del vivero desde aquí.</p>
             </div>
 
             {/* BARRA DE BÚSQUEDA */}
-            <div className="mb-4">
-              <input
-                type="text"
-                className="form-control form-control-lg"
-                placeholder="🔍 Buscar planta por nombre o categoría..."
-                value={busqueda}
-                onChange={(e) => setBusqueda(e.target.value)}
-                style={{ borderRadius: "14px", fontSize: "16px" }}
-              />
-            </div>
+            <input
+              type="text"
+              className="form-control form-control-lg mb-3"
+              placeholder="🔍 Buscar planta por nombre o categoría..."
+              value={busqueda}
+              onChange={(e) => setBusqueda(e.target.value)}
+              style={{ borderRadius: "14px" }}
+            />
 
-            <h3 className="mb-4 fw-bold">
+            <h5 className="mb-3 fw-bold">
               Inventario Disponible
-              {busqueda && !cargando && (
-                <span className="fs-6 fw-normal ms-2 text-white-50">
-                  — {productosFiltrados.length} resultado(s)
-                </span>
-              )}
-            </h3>
+              {busqueda && !cargando && <span className="fs-6 fw-normal ms-2 text-white-50">— {productosFiltrados.length} resultado(s)</span>}
+            </h5>
 
-            {/* ESQUELETOS DE CARGA */}
+            {/* ESQUELETOS */}
             {cargando && (
               <div className="row">
-                {[...Array(8)].map((_, i) => (
-                  <div key={i} className="col-md-4 mb-4">
-                    <div className="card border-0 shadow-lg" style={{ borderRadius: "20px", overflow: "hidden", background: "rgba(255,255,255,0.15)" }}>
-                      <div style={{ height: "180px", background: "rgba(255,255,255,0.1)", animation: "pulse 1.5s infinite" }} />
-                      <div className="card-body">
-                        <div style={{ height: "16px", borderRadius: "8px", background: "rgba(255,255,255,0.15)", marginBottom: "8px", animation: "pulse 1.5s infinite" }} />
-                        <div style={{ height: "12px", borderRadius: "8px", background: "rgba(255,255,255,0.1)", width: "60%", marginBottom: "12px", animation: "pulse 1.5s infinite" }} />
-                        <div style={{ height: "28px", borderRadius: "8px", background: "rgba(255,255,255,0.1)", animation: "pulse 1.5s infinite" }} />
+                {[...Array(6)].map((_, i) => (
+                  <div key={i} className="col-6 col-md-4 mb-3">
+                    <div className="card border-0" style={{ borderRadius: "16px", overflow: "hidden", background: "rgba(255,255,255,0.15)" }}>
+                      <div style={{ height: "140px", background: "rgba(255,255,255,0.1)", animation: "pulse 1.5s infinite" }} />
+                      <div className="p-2">
+                        <div style={{ height: "14px", borderRadius: "6px", background: "rgba(255,255,255,0.15)", marginBottom: "6px", animation: "pulse 1.5s infinite" }} />
+                        <div style={{ height: "24px", borderRadius: "6px", background: "rgba(255,255,255,0.1)", animation: "pulse 1.5s infinite" }} />
                       </div>
                     </div>
                   </div>
                 ))}
-                <style>{`@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.4} }`}</style>
+                <style>{`@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}`}</style>
               </div>
             )}
 
             {/* TARJETAS */}
-            {!cargando && <div className="row">
-              {productosFiltrados.map((producto) => (
-                <div key={producto.Id} className="col-md-4 mb-4">
-                  <div
-                    className="card border-0 shadow-lg h-100 text-center"
-                    style={{ borderRadius: "20px", overflow: "hidden", background: "rgba(255,255,255,0.95)", transition: ".3s" }}
-                  >
-                    <img
-                      src={producto.Imagen}
-                      alt={producto.Nombre}
-                      loading="lazy"
-                      style={{ height: "180px", objectFit: "cover" }}
-                      onError={(e) => { e.target.style.display = "none"; }}
-                    />
-                    <div className="card-body d-flex flex-column">
-                      <h5 className="fw-bold text-dark mb-1">{producto.Nombre}</h5>
-                      <p className="text-muted mb-2 small">{producto.Categoria}</p>
-                      <span className={`badge mb-2 p-2 ${producto.Stock <= 5 ? "bg-danger" : "bg-success"}`}>
-                        Stock: {producto.Stock}
-                      </span>
-                      <h5 className="text-success fw-bold mb-3">${producto.Precio}</h5>
-
-                      {/* AGREGAR AL CARRITO */}
-                      <div className="d-flex gap-2 mt-auto">
-                        <input
-                          type="number"
-                          className="form-control form-control-sm text-center"
-                          value={cantidades[producto.Id] || 1}
-                          min="1"
-                          max={producto.Stock}
-                          onChange={(e) =>
-                            setCantidades({ ...cantidades, [producto.Id]: e.target.value })
-                          }
-                          style={{ width: "65px", borderRadius: "10px" }}
-                        />
-                        <button
-                          className="btn btn-success btn-sm flex-grow-1"
-                          style={{ borderRadius: "10px" }}
-                          onClick={() => agregarAlCarrito(producto)}
-                          disabled={producto.Stock === 0}
-                        >
-                          {producto.Stock === 0 ? "Sin stock" : "🛒 Agregar"}
-                        </button>
+            {!cargando && (
+              <div className="row">
+                {productosFiltrados.map((producto) => (
+                  <div key={producto.Id} className="col-6 col-md-4 mb-3">
+                    <div className="card border-0 shadow h-100 text-center" style={{ borderRadius: "16px", overflow: "hidden", background: "rgba(255,255,255,0.95)" }}>
+                      <img src={producto.Imagen} alt={producto.Nombre} loading="lazy"
+                        style={{ height: "140px", objectFit: "cover" }}
+                        onError={(e) => { e.target.style.display = "none"; }} />
+                      <div className="card-body p-2 d-flex flex-column">
+                        <h6 className="fw-bold text-dark mb-1" style={{ fontSize: "13px" }}>{producto.Nombre}</h6>
+                        <p className="text-muted mb-1" style={{ fontSize: "11px" }}>{producto.Categoria}</p>
+                        <span className={`badge mb-1 ${producto.Stock <= 5 ? "bg-danger" : "bg-success"}`} style={{ fontSize: "11px" }}>
+                          Stock: {producto.Stock}
+                        </span>
+                        <p className="text-success fw-bold mb-2" style={{ fontSize: "14px" }}>${producto.Precio}</p>
+                        <div className="d-flex gap-1 mt-auto">
+                          <input
+                            type="number"
+                            className="form-control form-control-sm text-center p-1"
+                            value={cantidades[producto.Id] || 1}
+                            min="1" max={producto.Stock}
+                            onChange={(e) => setCantidades({ ...cantidades, [producto.Id]: e.target.value })}
+                            style={{ width: "50px", borderRadius: "8px", fontSize: "13px" }}
+                          />
+                          <button
+                            className="btn btn-success btn-sm flex-grow-1"
+                            style={{ borderRadius: "8px", fontSize: "12px" }}
+                            onClick={() => agregarAlCarrito(producto)}
+                            disabled={producto.Stock === 0}
+                          >
+                            {producto.Stock === 0 ? "Sin stock" : "🛒 Agregar"}
+                          </button>
+                        </div>
                       </div>
                     </div>
                   </div>
-                </div>
-              ))}
-            </div>
-
-            {productosFiltrados.length === 0 && !cargando && (
-              <div className="alert alert-light" style={{ background: "rgba(255,255,255,.75)" }}>
-                {busqueda ? `No se encontraron productos con "${busqueda}"` : "No hay productos registrados"}
+                ))}
+                {productosFiltrados.length === 0 && (
+                  <div className="alert alert-light">{busqueda ? `Sin resultados para "${busqueda}"` : "No hay productos registrados"}</div>
+                )}
               </div>
             )}
-            </div>}
           </div>
 
-          {/* CARRITO DE VENTA */}
-          <div className="col-md-3 p-4">
-            <div
-              className="shadow p-4 sticky-top"
-              style={{
-                top: "20px",
-                borderRadius: "20px",
-                background: "rgba(255,255,255,0.18)",
-                backdropFilter: "blur(14px)",
-                border: "1px solid rgba(255,255,255,.3)",
-                color: "white",
-              }}
-            >
-              <h5 className="fw-bold mb-3">🛒 Carrito de Venta</h5>
-
+          {/* CARRITO */}
+          <div className="col-12 col-md-3 p-3">
+            <div className="shadow p-3" style={{ borderRadius: "20px", background: "rgba(255,255,255,0.18)", backdropFilter: "blur(14px)", border: "1px solid rgba(255,255,255,.3)", color: "white", position: "sticky", top: "10px" }}>
+              <h6 className="fw-bold mb-3">🛒 Carrito de Venta {carrito.length > 0 && <span className="badge bg-success">{carrito.length}</span>}</h6>
               {carrito.length === 0 ? (
                 <p className="text-white-50 small">Agrega productos para crear una venta.</p>
               ) : (
                 <>
                   {carrito.map((item) => (
-                    <div key={item.Id} className="mb-3 p-2 rounded" style={{ background: "rgba(255,255,255,.12)" }}>
-                      <div className="d-flex justify-content-between align-items-start">
-                        <span className="fw-bold small">{item.Nombre}</span>
-                        <button
-                          className="btn btn-sm btn-danger py-0 px-1"
-                          style={{ fontSize: "11px" }}
-                          onClick={() => quitarDelCarrito(item.Id)}
-                        >
-                          ✕
-                        </button>
+                    <div key={item.Id} className="mb-2 p-2 rounded" style={{ background: "rgba(255,255,255,.12)" }}>
+                      <div className="d-flex justify-content-between align-items-center">
+                        <span className="fw-bold" style={{ fontSize: "13px" }}>{item.Nombre}</span>
+                        <button className="btn btn-danger btn-sm py-0 px-1" style={{ fontSize: "11px" }} onClick={() => quitarDelCarrito(item.Id)}>✕</button>
                       </div>
                       <div className="d-flex align-items-center gap-2 mt-1">
-                        <input
-                          type="number"
-                          className="form-control form-control-sm text-center"
-                          value={item.cantidad}
-                          min="1"
+                        <input type="number" className="form-control form-control-sm text-center"
+                          value={item.cantidad} min="1"
                           max={productos.find((p) => p.Id === item.Id)?.Stock || 999}
                           onChange={(e) => cambiarCantidadCarrito(item.Id, e.target.value)}
-                          style={{ width: "60px", borderRadius: "8px" }}
-                        />
-                        <span className="small text-white-50">× ${item.Precio}</span>
-                        <span className="ms-auto fw-bold text-success small">
-                          ${(Number(item.Precio) * item.cantidad).toFixed(2)}
-                        </span>
+                          style={{ width: "55px", borderRadius: "6px", fontSize: "12px" }} />
+                        <span style={{ fontSize: "12px" }} className="text-white-50">× ${item.Precio}</span>
+                        <span className="ms-auto fw-bold text-success" style={{ fontSize: "13px" }}>${(Number(item.Precio) * item.cantidad).toFixed(2)}</span>
                       </div>
                     </div>
                   ))}
-
                   <hr style={{ borderColor: "rgba(255,255,255,.3)" }} />
-
                   <div className="d-flex justify-content-between fw-bold mb-3">
                     <span>Total:</span>
                     <span className="text-success fs-5">${totalCarrito.toFixed(2)}</span>
                   </div>
-
-                  <button
-                    className="btn btn-success w-100 fw-bold"
-                    style={{ borderRadius: "12px" }}
-                    onClick={registrarVenta}
-                    disabled={procesando}
-                  >
+                  <button className="btn btn-success w-100 fw-bold mb-2" style={{ borderRadius: "12px" }} onClick={registrarVenta} disabled={procesando}>
                     {procesando ? "Procesando..." : "✅ Registrar Venta"}
                   </button>
-
-                  <button
-                    className="btn btn-outline-light w-100 mt-2"
-                    style={{ borderRadius: "12px", fontSize: "13px" }}
-                    onClick={() => setCarrito([])}
-                  >
+                  <button className="btn btn-outline-light w-100" style={{ borderRadius: "12px", fontSize: "13px" }} onClick={() => setCarrito([])}>
                     Vaciar carrito
                   </button>
                 </>
               )}
             </div>
           </div>
-
         </div>
       </div>
+
+      {/* ======= MODAL TICKET ======= */}
+      {ticket && (
+        <div className="position-fixed top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center" style={{ background: "rgba(0,0,0,0.7)", zIndex: 9999 }}>
+          <div className="bg-white rounded p-4 shadow-lg" style={{ maxWidth: "380px", width: "90%", borderRadius: "20px" }}>
+            {/* CABECERA TICKET */}
+            <div className="text-center mb-3">
+              <img src={logo} alt="Logo" style={{ width: "60px", height: "60px", borderRadius: "50%", objectFit: "cover" }} />
+              <h5 className="fw-bold mt-2 mb-0 text-success">Plantas Perenes de la Vega</h5>
+              <p className="text-muted small mb-0">Ticket de Venta</p>
+              <p className="text-muted small">{ticket.fecha}</p>
+            </div>
+
+            <hr />
+
+            {/* PRODUCTOS */}
+            <table className="table table-sm mb-2">
+              <thead>
+                <tr style={{ fontSize: "12px" }}>
+                  <th>Producto</th>
+                  <th className="text-center">Cant.</th>
+                  <th className="text-end">Total</th>
+                </tr>
+              </thead>
+              <tbody>
+                {ticket.items.map((item) => (
+                  <tr key={item.Id} style={{ fontSize: "13px" }}>
+                    <td>{item.Nombre}</td>
+                    <td className="text-center">{item.cantidad} × ${item.Precio}</td>
+                    <td className="text-end fw-bold">${(Number(item.Precio) * item.cantidad).toFixed(2)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+
+            <hr />
+
+            <div className="d-flex justify-content-between fw-bold fs-5 mb-3">
+              <span>TOTAL</span>
+              <span className="text-success">${ticket.total.toFixed(2)}</span>
+            </div>
+
+            <p className="text-center text-muted small mb-3">¡Gracias por su compra! 🌱</p>
+
+            <div className="d-flex gap-2">
+              <button className="btn btn-outline-secondary flex-grow-1" style={{ borderRadius: "10px" }}
+                onClick={() => window.print()}>
+                🖨️ Imprimir
+              </button>
+              <button className="btn btn-success flex-grow-1" style={{ borderRadius: "10px" }}
+                onClick={() => setTicket(null)}>
+                Cerrar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ESTILOS PARA IMPRIMIR TICKET */}
+      <style>{`
+        @media print {
+          body > * { display: none !important; }
+          .position-fixed { display: flex !important; position: static !important; background: white !important; }
+          .btn { display: none !important; }
+        }
+        @media (max-width: 767px) {
+          body { font-size: 14px; }
+        }
+      `}</style>
     </div>
   );
 };

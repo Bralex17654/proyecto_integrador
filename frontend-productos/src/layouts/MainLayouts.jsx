@@ -45,12 +45,6 @@ const MainLayout = () => {
           </li>
 
           <li className="nav-item mb-3">
-            <Link to="/clientes" className="nav-link text-white">
-              Clientes
-            </Link>
-          </li>
-
-          <li className="nav-item mb-3">
             <Link to="/proveedores" className="nav-link text-white">
               Proveedores
             </Link>

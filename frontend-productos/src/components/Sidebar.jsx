@@ -38,11 +38,6 @@ const Sidebar = () => {
           </Link>
         </li>
 
-        <li className="nav-item mb-2">
-          <Link to="/clientes" className="nav-link text-white">
-            Clientes
-          </Link>
-        </li>
       </ul>
 
       <button className="btn btn-danger mt-4 w-100" onClick={logout}>

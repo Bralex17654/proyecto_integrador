@@ -114,7 +114,6 @@ const Admin = () => {
     { to: "/productos",   label: "📦 Productos" },
     { to: "/inventario",  label: "🌿 Inventario" },
     { to: "/ventas",      label: "💰 Ventas" },
-    { to: "/clientes",    label: "👥 Clientes" },
     { to: "/proveedores", label: "🏭 Proveedores" },
     { to: "/reportes",    label: "📊 Reportes" },
     { to: "/dashboard",   label: "📈 Dashboard" },

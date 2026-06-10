@@ -6,7 +6,6 @@ import fondo from "../assets/fondo_6.png";
 const Dashboard = () => {
   const [data, setData] = useState({
     totalProductos: 0,
-    totalClientes: 0,
     totalVentas: 0,
     ingresosTotales: 0,
     stockBajo: [],
@@ -30,7 +29,6 @@ const Dashboard = () => {
     { icono: "💰", valor: `$${Number(data.ingresosTotales).toFixed(2)}`, etiqueta: "Ingresos Totales", color: "rgba(25,135,84,.85)" },
     { icono: "🧾", valor: data.totalVentas, etiqueta: "Ventas Registradas", color: "rgba(13,110,253,.80)" },
     { icono: "📦", valor: data.totalProductos, etiqueta: "Productos", color: "rgba(102,16,242,.80)" },
-    { icono: "👥", valor: data.totalClientes, etiqueta: "Clientes", color: "rgba(255,143,0,.85)" },
   ];
 
   return (
@@ -58,7 +56,7 @@ const Dashboard = () => {
           {/* TARJETAS */}
           <div className="row g-4 mb-4">
             {tarjetas.map((t, i) => (
-              <div className="col-md-3 col-6" key={i}>
+              <div className="col-md-4 col-6" key={i}>
                 <div
                   className="text-white text-center p-4 shadow"
                   style={{

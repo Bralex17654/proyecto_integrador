@@ -7,7 +7,6 @@ import Inventario from "../pages/Inventario";
 import Productos from "../pages/Productos";
 import Ventas from "../pages/Ventas";
 import Reportes from "../pages/Reportes";
-import Clientes from "../pages/Clientes";
 import Proveedores from "../pages/Proveedores";
 
 /* Protege rutas: si no hay token redirige al login */
@@ -28,7 +27,6 @@ const AppRoutes = () => {
         <Route path="/productos"    element={<PrivateRoute><Productos /></PrivateRoute>} />
         <Route path="/ventas"       element={<PrivateRoute><Ventas /></PrivateRoute>} />
         <Route path="/reportes"     element={<PrivateRoute><Reportes /></PrivateRoute>} />
-        <Route path="/clientes"     element={<PrivateRoute><Clientes /></PrivateRoute>} />
         <Route path="/proveedores"  element={<PrivateRoute><Proveedores /></PrivateRoute>} />
 
         <Route path="*" element={<Navigate to="/" />} />

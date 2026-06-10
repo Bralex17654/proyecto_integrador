@@ -7,6 +7,7 @@ import ventasRoutes from "./routes/ventas.routes.js";
 import clientesRoutes from "./routes/clientes.routes.js";
 import proveedoresRoutes from "./routes/proveedores.routes.js";
 import dashboardRoutes from "./routes/dashboard.routes.js";
+import adminRoutes from "./routes/admin.routes.js";
 
 const app = express();
 
@@ -32,5 +33,7 @@ app.use("/api/clientes", clientesRoutes);
 app.use("/api/proveedores", proveedoresRoutes);
 
 app.use("/api/dashboard", dashboardRoutes);
+
+app.use("/api/admin", adminRoutes);
 
 export default app;

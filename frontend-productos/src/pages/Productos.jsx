@@ -6,10 +6,12 @@ import {
   updateProducto,
   deleteProducto,
 } from "../services/productos.service";
+import { getProveedores } from "../services/proveedores.service";
 import fondoProductos from "../assets/fondo_8.png";
 
 const Productos = () => {
   const [productos, setProductos] = useState([]);
+  const [proveedores, setProveedores] = useState([]);
 
   const [formulario, setFormulario] = useState({
     nombre: "",
@@ -18,6 +20,7 @@ const Productos = () => {
     categoria: "",
     stock: "",
     imagen: "",
+    proveedor_id: "",
   });
 
   const [editando, setEditando] = useState(false);
@@ -31,12 +34,22 @@ const Productos = () => {
 
   useEffect(() => {
     obtenerProductos();
+    obtenerProveedores();
   }, []);
 
   const obtenerProductos = async () => {
     try {
       const data = await getProductos();
       setProductos(data);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const obtenerProveedores = async () => {
+    try {
+      const data = await getProveedores();
+      setProveedores(data);
     } catch (error) {
       console.error(error);
     }
@@ -105,6 +118,7 @@ const Productos = () => {
         categoria: formulario.categoria,
         stock: formulario.stock,
         imagen: formulario.imagen,
+        proveedor_id: formulario.proveedor_id || null,
       };
 
       if (editando) {
@@ -140,6 +154,7 @@ const Productos = () => {
       categoria: producto.Categoria,
       stock: producto.Stock,
       imagen: producto.Imagen || "",
+      proveedor_id: producto.ProveedorId || "",
     });
 
     setIdProducto(producto.Id);
@@ -178,6 +193,7 @@ const Productos = () => {
       categoria: "",
       stock: "",
       imagen: "",
+      proveedor_id: "",
     });
 
     setIdProducto(null);
@@ -294,6 +310,22 @@ const Productos = () => {
                     required
                   />
 
+                  {/* PROVEEDOR */}
+
+                  <select
+                    className="form-control mb-3"
+                    name="proveedor_id"
+                    value={formulario.proveedor_id}
+                    onChange={handleChange}
+                  >
+                    <option value="">Sin proveedor asignado</option>
+                    {proveedores.map((p) => (
+                      <option key={p.Id} value={p.Id}>
+                        {p.Nombre} {p.Empresa ? `(${p.Empresa})` : ""}
+                      </option>
+                    ))}
+                  </select>
+
                   {/* IMAGEN */}
 
                   <div className="mb-3">
@@ -387,6 +419,7 @@ const Productos = () => {
                         <th>Precio</th>
                         <th>Stock</th>
                         <th>Categoría</th>
+                        <th className="d-none d-md-table-cell">Proveedor</th>
                         <th>Acciones</th>
                       </tr>
                     </thead>
@@ -408,6 +441,8 @@ const Productos = () => {
                           <td>{producto.Stock}</td>
 
                           <td>{producto.Categoria}</td>
+
+                          <td className="d-none d-md-table-cell">{producto.Proveedor || "—"}</td>
 
                           <td>
                             <button

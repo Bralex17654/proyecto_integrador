@@ -293,55 +293,56 @@ const Admin = () => {
       {/* ======= MODAL TICKET ======= */}
       {ticket && (
         <div className="position-fixed top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center" style={{ background: "rgba(0,0,0,0.7)", zIndex: 9999 }}>
-          <div className="bg-white rounded p-4 shadow-lg" style={{ maxWidth: "380px", width: "90%", borderRadius: "20px" }}>
+          <div className="ticket-print bg-white shadow-lg" style={{ maxWidth: "380px", width: "90%", borderRadius: "16px", overflow: "hidden", border: "1px solid #c8e6c9" }}>
             {/* CABECERA TICKET */}
-            <div className="text-center mb-3">
-              <img src={logo} alt="Logo" style={{ width: "60px", height: "60px", borderRadius: "50%", objectFit: "cover" }} />
-              <h5 className="fw-bold mt-2 mb-0 text-success">Plantas Perenes de la Vega</h5>
-              <p className="text-muted small mb-0">Ticket de Venta</p>
-              <p className="text-muted small">{ticket.fecha}</p>
+            <div className="text-center p-3" style={{ background: "#198754", color: "#fff" }}>
+              <img src={logo} alt="Logo" style={{ width: "55px", height: "55px", borderRadius: "50%", objectFit: "cover", border: "2px solid #fff" }} />
+              <h5 className="fw-bold mt-2 mb-0">Plantas Perenes de la Vega</h5>
+              <p className="small mb-0" style={{ opacity: 0.9 }}>Ticket de Venta</p>
             </div>
 
-            <hr />
+            <div className="p-3">
+              <p className="text-muted small text-center mb-3">{ticket.fecha}</p>
 
-            {/* PRODUCTOS */}
-            <table className="table table-sm mb-2">
-              <thead>
-                <tr style={{ fontSize: "12px" }}>
-                  <th>Producto</th>
-                  <th className="text-center">Cant.</th>
-                  <th className="text-end">Total</th>
-                </tr>
-              </thead>
-              <tbody>
-                {ticket.items.map((item) => (
-                  <tr key={item.Id} style={{ fontSize: "13px" }}>
-                    <td>{item.Nombre}</td>
-                    <td className="text-center">{item.cantidad} × ${item.Precio}</td>
-                    <td className="text-end fw-bold">${(Number(item.Precio) * item.cantidad).toFixed(2)}</td>
+              {/* PRODUCTOS */}
+              <table className="table table-sm mb-2">
+                <thead>
+                  <tr style={{ fontSize: "12px", color: "#198754", borderBottom: "2px solid #198754" }}>
+                    <th>Producto</th>
+                    <th className="text-center">Cant.</th>
+                    <th className="text-end">Total</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {ticket.items.map((item) => (
+                    <tr key={item.Id} style={{ fontSize: "13px" }}>
+                      <td>{item.Nombre}</td>
+                      <td className="text-center">{item.cantidad} × ${item.Precio}</td>
+                      <td className="text-end fw-bold">${(Number(item.Precio) * item.cantidad).toFixed(2)}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
 
-            <hr />
+              <hr style={{ borderColor: "#c8e6c9" }} />
 
-            <div className="d-flex justify-content-between fw-bold fs-5 mb-3">
-              <span>TOTAL</span>
-              <span className="text-success">${ticket.total.toFixed(2)}</span>
-            </div>
+              <div className="d-flex justify-content-between fw-bold fs-5 mb-3" style={{ color: "#198754" }}>
+                <span>TOTAL</span>
+                <span>${ticket.total.toFixed(2)}</span>
+              </div>
 
-            <p className="text-center text-muted small mb-3">¡Gracias por su compra! 🌱</p>
+              <p className="text-center text-muted small mb-3">¡Gracias por su compra! 🌱</p>
 
-            <div className="d-flex gap-2">
-              <button className="btn btn-outline-secondary flex-grow-1" style={{ borderRadius: "10px" }}
-                onClick={() => window.print()}>
-                🖨️ Imprimir
-              </button>
-              <button className="btn btn-success flex-grow-1" style={{ borderRadius: "10px" }}
-                onClick={() => setTicket(null)}>
-                Cerrar
-              </button>
+              <div className="d-flex gap-2 no-print">
+                <button className="btn btn-outline-success flex-grow-1" style={{ borderRadius: "10px" }}
+                  onClick={() => window.print()}>
+                  🖨️ Imprimir
+                </button>
+                <button className="btn btn-success flex-grow-1" style={{ borderRadius: "10px" }}
+                  onClick={() => setTicket(null)}>
+                  Cerrar
+                </button>
+              </div>
             </div>
           </div>
         </div>
@@ -350,9 +351,19 @@ const Admin = () => {
       {/* ESTILOS PARA IMPRIMIR TICKET */}
       <style>{`
         @media print {
-          body > * { display: none !important; }
-          .position-fixed { display: flex !important; position: static !important; background: white !important; }
-          .btn { display: none !important; }
+          body * { visibility: hidden; }
+          .ticket-print, .ticket-print * { visibility: visible; }
+          .ticket-print {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100% !important;
+            max-width: 100% !important;
+            border: none !important;
+            box-shadow: none !important;
+            border-radius: 0 !important;
+          }
+          .no-print { display: none !important; }
         }
         @media (max-width: 767px) {
           body { font-size: 14px; }

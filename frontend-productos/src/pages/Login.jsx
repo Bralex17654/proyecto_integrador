@@ -62,7 +62,7 @@ const Login = () => {
 
   return (
     <div
-      className="container-fluid d-flex justify-content-center align-items-center position-relative"
+      className="container-fluid d-flex justify-content-center align-items-center position-relative px-3 py-4"
       style={{
         minHeight: "100vh",
         backgroundImage: `url(${fondo})`,
@@ -84,9 +84,10 @@ const Login = () => {
       {/* CONTENIDO */}
 
       <div
-        className="text-center position-relative"
+        className="text-center position-relative w-100"
         style={{
           zIndex: 2,
+          maxWidth: "420px",
         }}
       >
         {/* LOGO */}
@@ -95,11 +96,11 @@ const Login = () => {
           src={logo}
           alt="Logo"
           style={{
-            width: "120px",
-            height: "120px",
+            width: "100px",
+            height: "100px",
             objectFit: "cover",
             borderRadius: "50%",
-            marginBottom: "20px",
+            marginBottom: "16px",
             boxShadow: "0 6px 20px rgba(0,0,0,.4)",
             border: "3px solid white",
           }}
@@ -108,9 +109,9 @@ const Login = () => {
         {/* CARD */}
 
         <div
-          className="card shadow p-4 border-0"
+          className="card shadow p-3 p-sm-4 border-0 w-100 mx-auto"
           style={{
-            width: "420px",
+            maxWidth: "420px",
             borderRadius: "25px",
             background: "rgba(255,255,255,0.15)",
             backdropFilter: "blur(12px)",
@@ -118,11 +119,11 @@ const Login = () => {
             color: "white",
           }}
         >
-          <h2 className="text-center mb-4 fw-bold">
+          <h2 className="text-center mb-3 fw-bold" style={{ fontSize: "1.5rem" }}>
             {registrando ? "Registro 🌱" : "Bienvenido 🌿"}
           </h2>
 
-          <p className="mb-4 text-light">
+          <p className="mb-4 text-light" style={{ fontSize: "0.9rem" }}>
             {registrando
               ? "Crea tu cuenta para comenzar"
               : "Ingresa a tu sistema de inventario"}
